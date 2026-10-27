@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <game/entitynetworkable.h>
 
 class CBaseEntity;
 class CBaseModelEntity;
@@ -114,6 +115,11 @@ typedef std::function<void(const char* szMap)> MapStartCallback;
 typedef std::function<void(int iSlot, Menu& hMenu)> OnSettingsOpenCallback;
 // Вызывается при выборе любого пункта меню настроек (аналог MenuCallbackFunc для CallbackMenu)
 typedef std::function<void(const char* szBack, const char* szFront, int iItem, int iSlot)> OnSettingsItemCallback;
+
+// windows.h (wingdi.h) defines ERROR as a macro
+#ifdef ERROR
+#undef ERROR
+#endif
 
 // Тип всплывающего уведомления (угловой тост)
 enum class NotifyType : int

@@ -23,7 +23,8 @@ for sdk_target in MMSPlugin.sdk_targets:
   sdk = sdk_target.sdk
   cxx = sdk_target.cxx
 
-  cxx.cxxflags += ['-Wno-invalid-offsetof', '-Wno-reorder-ctor']
+  if cxx.like('gcc'):
+    cxx.cxxflags += ['-Wno-invalid-offsetof', '-Wno-reorder-ctor']
   if cxx.target.platform == 'linux':
     cxx.defines += [
       'bswap_16=__builtin_bswap16',
@@ -33,7 +34,10 @@ for sdk_target in MMSPlugin.sdk_targets:
   binary = MMSPlugin.HL2Library(builder, cxx, MMSPlugin.plugin_name, sdk)
 
   # network_connection.proto и зависимости в свежем SDK лежат в thirdparty/game_protobufs/csgo
+  # mrc4tt/hl2sdk кладёт их в common
   proto_dir = os.path.join(sdk['path'], 'thirdparty', 'game_protobufs', 'csgo')
+  if not os.path.isfile(os.path.join(proto_dir, 'network_connection.proto')):
+    proto_dir = os.path.join(sdk['path'], 'common')
   proto_sources = [
     os.path.join(proto_dir, f) for f in [
       'valveextensions.proto',
@@ -47,12 +51,12 @@ for sdk_target in MMSPlugin.sdk_targets:
 
   binary.compiler.cxxincludes += [
     os.path.join(builder.sourcePath, 'include'),
-    os.path.join(builder.sourcePath, '..', 'SchemaEntity'),
+    os.path.join(builder.sourcePath, 'schemaentity'),
   ]
 
   binary.sources += [
     'levels_ranks.cpp',
-    os.path.join('..', 'SchemaEntity', 'schemasystem.cpp'),
+    os.path.join('schemaentity', 'schemasystem.cpp'),
   ]
 
   if cxx.target.arch == 'x86':

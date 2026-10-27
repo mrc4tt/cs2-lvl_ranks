@@ -267,6 +267,7 @@ class MMSPluginConfig(object):
       os.path.join(context.currentSourcePath),
       os.path.join(mms_core_path),	
       os.path.join(mms_core_path, 'sourcehook'),
+      os.path.join(self.mms_root, 'third_party', 'khook', 'include'),
     ]
 
     defines = []
@@ -274,22 +275,28 @@ class MMSPluginConfig(object):
       cxx.defines += ['SE_{}={}'.format(other_sdk['define'], other_sdk['code'])]
 
     cxx.defines += ['META_IS_SOURCE2', 'CS2']
-    binary.sources += [
-      os.path.join(sdk['path'], 'public', 'tier0', 'memoverride.cpp'),
-      os.path.join(sdk['path'], 'public', 'networkvar.cpp'),
-      os.path.join(sdk['path'], 'tier1', 'generichash.cpp'),
-      os.path.join(sdk['path'], 'entity2', 'entitysystem.cpp'),
-      os.path.join(sdk['path'], 'entity2', 'entityhandle.cpp'),
-      os.path.join(sdk['path'], 'entity2', 'concreteentitylist.cpp'),
-      os.path.join(sdk['path'], 'entity2', 'entityidentity.cpp'),
-      os.path.join(sdk['path'], 'entity2', 'entitykeyvalues.cpp'),
-      os.path.join(sdk['path'], 'entity2', 'entitypulse.cpp'),
-      os.path.join(sdk['path'], 'entity2', 'entitypulsecallcontext.cpp'),
-      os.path.join(sdk['path'], 'tier0_perproject', 'convar.cpp'),
-      os.path.join(sdk['path'], 'tier0_perproject', 'convarref.cpp'),
-      os.path.join(sdk['path'], 'tier0_perproject', 'concommandbase.cpp'),
-      os.path.join(sdk['path'], 'kv3lib', 'keyvalues3.cpp'),
-    ]
+    # SDK layouts differ between hl2sdk forks (alliedmodders vs mrc4tt/hl2sdk, where tier1
+    # lives in tier0_perproject); take each source from wherever this SDK has it.
+    for rel in [
+      ('public', 'tier0', 'memoverride.cpp'),
+      ('public', 'networkvar.cpp'),
+      ('tier1', 'generichash.cpp'),
+      ('entity2', 'entitysystem.cpp'),
+      ('entity2', 'entityhandle.cpp'),
+      ('entity2', 'concreteentitylist.cpp'),
+      ('entity2', 'entityidentity.cpp'),
+      ('entity2', 'entitykeyvalues.cpp'),
+      ('entity2', 'entitypulse.cpp'),
+      ('entity2', 'entitypulsecallcontext.cpp'),
+      ('tier0_perproject', 'convar.cpp'),
+      ('tier0_perproject', 'convarref.cpp'),
+      ('tier0_perproject', 'concommandbase.cpp'),
+      ('kv3lib', 'keyvalues3.cpp'),
+      ('tier0_perproject', 'keyvalues3.cpp'),
+    ]:
+      path = os.path.join(sdk['path'], *rel)
+      if os.path.isfile(path):
+        binary.sources += [path]
 
     SdkHelpers.configureCxx(context, binary, sdk)
 

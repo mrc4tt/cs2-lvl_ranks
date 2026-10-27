@@ -2,10 +2,10 @@
 #define _INCLUDE_METAMOD_SOURCE_STUB_PLUGIN_H_
 
 #include <ISmmPlugin.h>
-#include <sh_vector.h>
+#include <engine2/ivengineserver2.h>
+#include <engine2/isource2server.h>
 #include "utlvector.h"
 #include "ehandle.h"
-#include <iserver.h>
 #include <entity2/entitysystem.h>
 #include "igameevents.h"
 #include "vector.h"

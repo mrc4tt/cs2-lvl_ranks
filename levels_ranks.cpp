@@ -1824,8 +1824,17 @@ void LR::AllPluginsLoaded()
 );", g_sTableName, g_Settings[LR_DB_Allow_UTF8MB4] ? " COLLATE 'utf8mb4_unicode_ci'" : " COLLATE 'utf8_unicode_ci'");
 			g_pConnection->Query(szQuery, [](ISQLQuery* test) {});
 
-			g_SMAPI->Format(szQuery, sizeof(szQuery), "ALTER TABLE `%s` ADD COLUMN `online` int NOT NULL DEFAULT 0;", g_sTableName);
-			g_pConnection->Query(szQuery, [](ISQLQuery* test) {});
+			// Таблицы старых версий без `online`: добавляем колонку только если её нет,
+			// иначе MySQL каждый старт пишет "Duplicate column name 'online'" (#14)
+			g_SMAPI->Format(szQuery, sizeof(szQuery), "SHOW COLUMNS FROM `%s` LIKE 'online';", g_sTableName);
+			g_pConnection->Query(szQuery, [](ISQLQuery* test) {
+				auto results = test->GetResultSet();
+				if(results && results->GetRowCount() > 0)
+					return;
+				char szQuery[256];
+				g_SMAPI->Format(szQuery, sizeof(szQuery), "ALTER TABLE `%s` ADD COLUMN `online` int NOT NULL DEFAULT 0;", g_sTableName);
+				g_pConnection->Query(szQuery, [](ISQLQuery* test) {});
+			});
 
 			g_SMAPI->Format(szQuery, sizeof(szQuery), "SELECT COUNT(`steam`) FROM `%s` WHERE `lastconnect` > 0 LIMIT 1;", g_sTableName);
 			g_pConnection->Query(szQuery, [](ISQLQuery* test) {
@@ -1881,12 +1890,12 @@ void LR::AllPluginsLoaded()
 	g_pUtils->HookEvent(g_PLID, "weapon_fire", 	OnOtherEvents);
 	g_pUtils->HookEvent(g_PLID, "player_hurt", 	OnOtherEvents);
 
-	g_pUtils->RegCommand(g_PLID, {"mm_lvl", "sm_lvl"}, {"!lvl", "lvl", "!дмд", "дмд"}, [](int iSlot, const char* szContent){
+	g_pUtils->RegCommand(g_PLID, {"mm_lvl", "sm_lvl"}, {"!lvl", "/lvl", "lvl", "!дмд", "/дмд", "дмд"}, [](int iSlot, const char* szContent){
 		OnLRMenu(iSlot);
 		return false;
 	});
 
-	g_pUtils->RegCommand(g_PLID, {"mm_rank", "sm_rank"}, {"!rank", "rank", "!кфтл", "кфтл"}, [](int iSlot, const char* szContent){
+	g_pUtils->RegCommand(g_PLID, {"mm_rank", "sm_rank"}, {"!rank", "/rank", "rank", "!кфтл", "/кфтл", "кфтл"}, [](int iSlot, const char* szContent){
 		int iKills = g_iPlayerInfo[iSlot].iStats[ST_KILLS],
 			iDeaths = g_iPlayerInfo[iSlot].iStats[ST_DEATHS];
 
@@ -1912,16 +1921,16 @@ void LR::AllPluginsLoaded()
 		return false;
 	});
 
-	g_pUtils->RegCommand(g_PLID, {"mm_session", "sm_session"}, {"!session", "session", "!ыуыышщт", "ыуыышщт"}, [](int iSlot, const char* szContent){
+	g_pUtils->RegCommand(g_PLID, {"mm_session", "sm_session"}, {"!session", "/session", "session", "!ыуыышщт", "/ыуыышщт", "ыуыышщт"}, [](int iSlot, const char* szContent){
 		return false;
 	});
 
-	g_pUtils->RegCommand(g_PLID, {"mm_toptime", "sm_toptime"}, {"!toptime", "toptime", "!ещзешьу", "ещзешьу"}, [](int iSlot, const char* szContent){
+	g_pUtils->RegCommand(g_PLID, {"mm_toptime", "sm_toptime"}, {"!toptime", "/toptime", "toptime", "!ещзешьу", "/ещзешьу", "ещзешьу"}, [](int iSlot, const char* szContent){
 		OverAllTopPlayers(iSlot);
 		return false;
 	});
 
-	g_pUtils->RegCommand(g_PLID, {"mm_top", "sm_top"}, {"!top", "top", "!ещз", "ещз"}, [](int iSlot, const char* szContent){
+	g_pUtils->RegCommand(g_PLID, {"mm_top", "sm_top"}, {"!top", "/top", "top", "!ещз", "/ещз", "ещз"}, [](int iSlot, const char* szContent){
 		OverAllTopPlayers(iSlot, false);
 		return false;
 	});
