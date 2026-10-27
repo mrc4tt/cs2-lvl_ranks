@@ -66,8 +66,8 @@ MariaDB does not have this problem.
 ## Changes from upstream
 
 - Builds against [mrc4tt/hl2sdk](https://github.com/mrc4tt/hl2sdk) (cs2) and Metamod:Source 2.x
-  with KHook. [SchemaEntity](https://github.com/Pisex/SchemaEntity) is vendored in
-  `schemaentity/` and ported to that SDK.
+  with KHook. SchemaEntity is the [mrc4tt/SchemaEntity](https://github.com/mrc4tt/SchemaEntity)
+  fork, ported to that SDK, as a submodule in `schemaentity/`.
 - Fixed: `/` prefix for chat commands ([upstream #22](https://github.com/Pisex/cs2-lvl_ranks/issues/22)).
 - Fixed: `Duplicate column name 'online'` on every start. The column is only added when an
   old table is missing it ([upstream #14](https://github.com/Pisex/cs2-lvl_ranks/issues/14)).
@@ -77,7 +77,7 @@ MariaDB does not have this problem.
 
 ## Building
 
-You need Docker. The script builds both platforms in containers and fetches the SDK,
+You need Docker. Clone with submodules (`git clone --recursive`). The script builds both platforms in containers and fetches the SDK,
 Metamod:Source (with [mrc4tt/KHook](https://github.com/mrc4tt/KHook)), hl2sdk-manifests
 and AMBuild into `~/.cache/lvl-ranks-local-release`.
 

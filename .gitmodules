@@ -1,0 +1,3 @@
+[submodule "schemaentity"]
+	path = schemaentity
+	url = https://github.com/mrc4tt/SchemaEntity
