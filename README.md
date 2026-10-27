@@ -26,7 +26,7 @@ It runs on Metamod:Source 2.x, both the official
 You need these two plugins and a database. Without them Levels Ranks will not start.
 
 - [Game Utils](https://github.com/Pisex/cs2-menus) (gives Levels Ranks its menus, commands
-  and events)
+  and events). Any version works.
 - [SQLMM](https://github.com/Pisex/mysql_mm) (the database connection)
 - A MySQL or MariaDB database
 
@@ -36,12 +36,15 @@ You need these two plugins and a database. Without them Levels Ranks will not st
 2. Extract it into your server's `game/csgo/` folder. It adds these files to your `addons`
    folder:
    ```
-   addons/plugins/levels_ranks.so          (levels_ranks.dll on Windows)
+   addons/levels_ranks/levels_ranks.so     (levels_ranks.dll on Windows)
+   addons/metamod/levels_ranks.vdf
    addons/configs/levels_ranks/settings.ini
    addons/translations/lr_core.phrases.txt
    addons/translations/lr_core_ranks.phrases.txt
    addons/data/lr_data.ini
    ```
+   Updating from 1.2.5 or older? Delete `addons/plugins/levels_ranks.so` (or `.dll`) if you
+   have it. Keep your `settings.ini`.
 3. Open `addons/configs/levels_ranks/settings.ini` and fill in your database details.
 4. Restart the server or change the map.
 
@@ -78,6 +81,8 @@ Game Utils is missing or did not load. Install it first, see [Before you install
 ## What is different from the original
 
 - Updated for the latest CS2 and Metamod:Source 2.x.
+- Installs the classic Metamod way, with its own `.vdf`, so it loads with every Game Utils
+  version (the original needs the plugin autoload from Game Utils 1.9.2).
 - Fixed: chat commands with `/` in front did not work
   ([#22](https://github.com/Pisex/cs2-lvl_ranks/issues/22)).
 - Fixed: `Duplicate column name 'online'` error on every start

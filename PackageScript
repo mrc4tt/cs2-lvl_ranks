@@ -2,15 +2,17 @@
 import os
 
 builder.SetBuildFolder('package')
-# autoload layout: utils loads every .so under addons/plugins (recursively), no .vdf needed
+# Classic Metamod layout: addons/levels_ranks/ + addons/metamod/levels_ranks.vdf.
+# Loads with plain Metamod and every Game Utils version. Game Utils' autoload only
+# looks at addons/plugins, and it leaves a .so alone when a hand-written .vdf already
+# loads a plugin with that name, so an old addons/plugins/levels_ranks.so is not
+# loaded twice.
 
-bin_folder_path = os.path.join('addons', 'plugins')
-bin_folder = builder.AddFolder(bin_folder_path)
+bin_folder = builder.AddFolder(os.path.join('addons', 'levels_ranks'))
+bin64_folder = bin_folder
 
-for cxx in MMSPlugin.all_targets:
-  if cxx.target.arch == 'x86_64':
-    bin64_folder_path = os.path.join('addons', 'plugins')
-    bin64_folder = builder.AddFolder(bin64_folder_path)
+metamod_folder = builder.AddFolder(os.path.join('addons', 'metamod'))
+builder.AddCopy(os.path.join(builder.sourcePath, 'levels_ranks.vdf'), metamod_folder)
 
 pdb_list = []
 for task in MMSPlugin.binaries:

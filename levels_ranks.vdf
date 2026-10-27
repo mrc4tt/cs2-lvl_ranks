@@ -1,0 +1,5 @@
+"Metamod Plugin"
+{
+	"alias"	"levels_ranks"
+	"file"	"addons/levels_ranks/levels_ranks"
+}
