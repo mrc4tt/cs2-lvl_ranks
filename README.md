@@ -9,7 +9,7 @@ kept building against the latest CS2 SDK.
 | | |
 |---|---|
 | Metamod:Source | [mrc4tt/metamod-source](https://github.com/mrc4tt/metamod-source) **and** [alliedmodders/metamod-source](https://github.com/alliedmodders/metamod-source) 2.x. The plugin API is the same in both, so one package works on either. |
-| Linux | One package for both **SteamRT3** (sniper) and **SteamRT4** servers. It is built in the SteamRT3 SDK, and the build fails if the binary needs a newer glibc than 2.31. |
+| Linux | `steamrt3` and `steamrt4` packages. **Not sure? Take `steamrt3`.** It is held to glibc 2.31, so it loads on both SteamRT3 (sniper) and SteamRT4 servers. |
 | Windows | Built with MSVC. |
 
 ## Requirements
@@ -23,8 +23,9 @@ Install these first. Without them the core unloads itself on start.
 
 ## Installation
 
-1. Download `levels_ranks-<version>-linux.tar.gz` or `-windows.zip` from
-   [Releases](https://github.com/mrc4tt/cs2-lvl_ranks/releases).
+1. Download `cs2-lvl_ranks-<version>-steamrt3.tar.gz` (Linux) or `-windows.zip` from
+   [Releases](https://github.com/mrc4tt/cs2-lvl_ranks/releases). The release notes have a
+   table of which file loads where.
 2. Extract it into `game/csgo/`, so the `addons` folder merges with yours:
    ```
    addons/plugins/levels_ranks.so          (levels_ranks.dll on Windows)
@@ -73,25 +74,38 @@ MariaDB does not have this problem.
   old table is missing it ([upstream #14](https://github.com/Pisex/cs2-lvl_ranks/issues/14)).
 - Documented: the MySQL 8 auth and missing Utils errors
   ([upstream #20](https://github.com/Pisex/cs2-lvl_ranks/issues/20)).
-- No GitHub Actions. Releases are built and published locally with `support/local-release.sh`.
+- No GitHub Actions. Releases are built and published on our own build server with
+  [cs2-build-system](https://github.com/mrc4tt/cs2-build-system)'s `build-all.sh`.
 
 ## Building
 
-You need Docker. Clone with submodules (`git clone --recursive`). The script builds both platforms in containers and fetches the SDK,
-Metamod:Source (with [mrc4tt/KHook](https://github.com/mrc4tt/KHook)), hl2sdk-manifests
-and AMBuild into `~/.cache/lvl-ranks-local-release`.
+Clone with submodules (`git clone --recursive`). You need
+[mrc4tt/hl2sdk](https://github.com/mrc4tt/hl2sdk) (`cs2` branch),
+[mrc4tt/metamod-source](https://github.com/mrc4tt/metamod-source) (with submodules),
+[hl2sdk-manifests](https://github.com/alliedmodders/hl2sdk-manifests) next to this folder, and
+[AMBuild](https://github.com/alliedmodders/ambuild):
 
 ```bash
-support/local-release.sh                    # build Linux + Windows into build-release/
-support/local-release.sh --targets linux    # Linux only
-support/local-release.sh --dry-run          # build, show what would be released
-support/local-release.sh --upload           # build and publish a GitHub release
+mkdir build && cd build
+python3 ../configure.py -s cs2 --targets=x86_64 --enable-optimize \
+  --hl2sdk-root=/path/to/sdks --mms_path=/path/to/metamod-source
+ambuild
 ```
 
-- Linux uses `ghcr.io/source2ze/build-containers:steamrt3`.
-- Windows uses the `msvc-wine` image from `cs2-build-system/msvc-wine-runner`.
-- The version is `product.version` plus the commit count, e.g. `1.2.4f-r26`. Push before
-  `--upload`, because the release tag points at the current commit.
+`--hl2sdk-root` is the folder that holds `hl2sdk-cs2`. The plugin ends up in `build/package/`.
+
+Releases are built in Docker by [cs2-build-system](https://github.com/mrc4tt/cs2-build-system):
+Windows with MSVC under Wine, Linux in the SteamRT3 and SteamRT4 build containers.
+
+```bash
+./build-all.sh --only cs2-lvl_ranks                       # build into output/release/
+./build-all.sh --release --dry-run --only cs2-lvl_ranks   # show the version plan, build, change nothing
+./build-all.sh --release --only cs2-lvl_ranks             # bump, tag, push, publish
+```
+
+The version is the string `LR::GetVersion()` returns in `levels_ranks.cpp`, and tags have
+no `v` prefix (`1.2.5`). A release with changes since the last tag bumps that string, commits
+`Release <version>` and tags it.
 
 ## Credits
 
