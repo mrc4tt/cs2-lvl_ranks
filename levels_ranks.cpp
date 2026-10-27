@@ -2294,7 +2294,7 @@ const char* LR::GetLicense()
 
 const char* LR::GetVersion()
 {
-	return "1.2.5";
+	return "1.2.6";
 }
 
 const char* LR::GetDate()
